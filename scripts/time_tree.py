@@ -17,7 +17,7 @@ def rands(n=N, len_range=(200, 16000), start_max=STOP):
         start = random.randint(1, start_max)
         return Interval(start, start + random.randint(*len_range))
 
-    return [rand() for i in xrange(n)]
+    return [rand() for i in range(n)]
 
 
 def brute_force_find(intervals, start, end):
@@ -49,22 +49,22 @@ while True:
     t0 = time.time()
     tree = IntervalTree(intervals)
     t1 = time.time()
-    print "time to build IntervalTree with %i intervals: %.3f" % (N, t1 - t0)
+    print(("time to build IntervalTree with %i intervals: %.3f" % (N, t1 - t0)))
     t0 = time.time()
     ints = Intersecter(intervals)
     t1 = time.time()
-    print "time to build Intersector with %i intervals: %.3f" % (N, t1 - t0)
+    print(("time to build Intersector with %i intervals: %.3f" % (N, t1 - t0)))
 
     found, t, tree_lens = search(tree, START, STOP, TRIES)
-    print "time to search tree %i times: %.3f. found %i intervals" % (TRIES, t, len(found))
+    print(("time to search tree %i times: %.3f. found %i intervals" % (TRIES, t, len(found))))
 
     found, t, brute_lens = search(intervals, START, STOP, TRIES)
-    print "time to search brute %i times: %.3f. found %i intervals" % (TRIES, t, len(found))
+    print(("time to search brute %i times: %.3f. found %i intervals" % (TRIES, t, len(found))))
 
     found, t, inter_lens = search(ints, START, STOP, TRIES)
-    print "time to search intersecter %i times: %.3f. found %i intervals" % (TRIES, t, len(found))
+    print(("time to search intersecter %i times: %.3f. found %i intervals" % (TRIES, t, len(found))))
 
     for tl, bl, il in zip(tree_lens, brute_lens, inter_lens):
         assert tl == bl == il, (tl, bl, il)
-    print
+    print()
     #start_max *= 2

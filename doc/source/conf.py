@@ -18,7 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../..'))
-print sys.path
+print((sys.path))
 
 # -- General configuration -----------------------------------------------------
 
@@ -44,8 +44,8 @@ autosummary_generate = True
 master_doc = 'index'
 
 # General information about the project.
-project = u'cruzdb'
-copyright = u'2013, Brent Pedersen'
+project = 'cruzdb'
+copyright = '2013, Brent Pedersen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -190,8 +190,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'cruzdb.tex', u'cruzdb Documentation',
-   u'Brent Pedersen', 'manual'),
+  ('index', 'cruzdb.tex', 'cruzdb Documentation',
+   'Brent Pedersen', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -220,8 +220,8 @@ latex_use_parts = False
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'cruzdb', u'cruzdb Documentation',
-     [u'Brent Pedersen'], 1)
+    ('index', 'cruzdb', 'cruzdb Documentation',
+     ['Brent Pedersen'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -234,8 +234,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'cruzdb', u'cruzdb Documentation',
-   u'Brent Pedersen', 'cruzdb', 'One line description of project.',
+  ('index', 'cruzdb', 'cruzdb Documentation',
+   'Brent Pedersen', 'cruzdb', 'One line description of project.',
    'Miscellaneous'),
 ]
 

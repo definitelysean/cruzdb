@@ -16,8 +16,8 @@ def blat(seq, name, db, seq_type="DNA"):
         # blat returns results without chr prefix
         if not hit[5].startswith("chr"): hit[5] = "chr" + hit[5]
         f.chrom = hit[5]
-        f.txStart = long(hit[7]) - 1 # blat returns 1-based hits.
-        f.txEnd = long(hit[8])
+        f.txStart = int(hit[7]) - 1 # blat returns 1-based hits.
+        f.txEnd = int(hit[8])
         f.strand = hit[6]
         f.identity = float(hit[4].rstrip("%"))
         f.span = int(hit[-1])

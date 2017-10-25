@@ -70,7 +70,7 @@ class TestFeature(unittest.TestCase):
         f = self.f
         u = f.upstream(10)
         self.assertEqual(u.end, f.start)
-        self.assert_(u.is_upstream_of(f))
+        self.assertTrue(u.is_upstream_of(f))
 
     def test_blat(self):
         try:
@@ -83,15 +83,15 @@ class TestFeature(unittest.TestCase):
         f.txStart = 135646802
         f.txEnd = 135646832
         r = list(f.blat())
-        self.assert_(str(f.txStart) in repr(r), r)
-        self.assert_(str(f.txEnd) in repr(r), r)
+        self.assertTrue(str(f.txStart) in repr(r), r)
+        self.assertTrue(str(f.txEnd) in repr(r), r)
 
 
     def test_downstream(self):
         f = self.f
         u = f.downstream(10)
         self.assertEqual(f.end, u.start)
-        self.assert_(u.is_downstream_of(f))
+        self.assertTrue(u.is_downstream_of(f))
         u.chrom = "fake"
         self.assertEqual(None,  u.is_upstream_of(f))
 
@@ -100,27 +100,27 @@ class TestBasic(unittest.TestCase):
         self.db = Genome('hg18')
 
     def testFirst(self):
-        self.assert_(hasattr(self.db.refGene.first(), "txStart"))
+        self.assertTrue(hasattr(self.db.refGene.first(), "txStart"))
 
     def test_bed_gene_pred(self):
         g = Genome('hg19')
         from sqlalchemy import and_
-        from cStringIO import StringIO
+        from io import StringIO
         query = g.knownGene.filter(and_(g.knownGene.txStart > 10000, g.knownGene.txEnd < 20000))
         c = StringIO()
         Genome.save_bed(query, c)
         c.seek(0)
         rows = c.readlines()
         for toks in (row.split("\t") for row in rows):
-            self.assert_(len(toks) == 12)
-            self.assert_(int(toks[1]) > 10000)
-            self.assert_(int(toks[2]) < 20000)
+            self.assertTrue(len(toks) == 12)
+            self.assertTrue(int(toks[1]) > 10000)
+            self.assertTrue(int(toks[2]) < 20000)
 
     def test_link(self):
         feat = self.db.knownGene.first()
         l = feat.link()
 
-        self.assert_(l == "http://genome.ucsc.edu/cgi-bin/hgGene?hgg_gene=uc001aaa.2&db=hg18", l)
+        self.assertTrue(l == "http://genome.ucsc.edu/cgi-bin/hgGene?hgg_gene=uc001aaa.2&db=hg18", l)
 
 
 
@@ -136,15 +136,15 @@ class TestGene(unittest.TestCase):
         self.gene = self.db.refGene.filter_by(name2="MUC5B").first()
 
     def testExons(self):
-        self.assert_(isinstance(self.gene.exons, list))
-        self.assert_(self.gene.exons[0][0] >= self.gene.txStart)
-        self.assert_(self.gene.exons[0][0] <= self.gene.cdsStart)
+        self.assertTrue(isinstance(self.gene.exons, list))
+        self.assertTrue(self.gene.exons[0][0] >= self.gene.txStart)
+        self.assertTrue(self.gene.exons[0][0] <= self.gene.cdsStart)
 
     def testIntrons(self):
-        self.assert_(isinstance(self.gene.introns, list))
-        self.assert_(self.gene.introns[0][0] >= self.gene.txStart)
-        self.assert_(self.gene.introns[0][0] == self.gene.exons[0][1])
-        self.assert_(all((s < e) for s, e in self.gene.introns))
+        self.assertTrue(isinstance(self.gene.introns, list))
+        self.assertTrue(self.gene.introns[0][0] >= self.gene.txStart)
+        self.assertTrue(self.gene.introns[0][0] == self.gene.exons[0][1])
+        self.assertTrue(all((s < e) for s, e in self.gene.introns))
 
     def testBed12(self):
         expected = "chr1	891739	900347	PLEKHN1,NM_032129	0	+	891774	899818	.	16	118,100,147,81,73,128,96,81,76,137,150,141,141,219,49,663,	0,207,3780,4024,4189,4382,4616,4827,5578,5791,6364,6689,7003,7336,7819,7945,"
@@ -161,17 +161,17 @@ class TestDb(unittest.TestCase):
         g = self.dba.knownGene.filter_by(name="uc010ntk.1").first()
         prot = g.protein
 
-        self.assert_(prot.startswith("MIITQTSHCYMTSLGILFLINILPGTTGQGESRRQEPGDFVKQDIG"), prot)
-        self.assert_(prot.endswith("SAIKGMIRKQ"), prot)
+        self.assertTrue(prot.startswith("MIITQTSHCYMTSLGILFLINILPGTTGQGESRRQEPGDFVKQDIG"), prot)
+        self.assertTrue(prot.endswith("SAIKGMIRKQ"), prot)
 
     def test_ok(self):
         ga = self.dba.refGene.filter_by(name2="MUC5B").first()
-        self.assert_(ga is not None)
+        self.assertTrue(ga is not None)
 
     def test_repr(self):
-        self.assert_("Genome" in repr(self.dba))
-        self.assert_("hg18" in repr(self.dba))
-        self.assert_("mysqldb" in repr(self.dba))
+        self.assertTrue("Genome" in repr(self.dba))
+        self.assertTrue("hg18" in repr(self.dba))
+        self.assertTrue("mysqldb" in repr(self.dba))
 
     def test_bins(self):
         bins = Genome.bins(12345, 56779)
@@ -180,7 +180,7 @@ class TestDb(unittest.TestCase):
 
     def test_tables(self):
         self.dba.refGene
-        self.assert_("refGene" in self.dba.tables, self.dba.tables)
+        self.assertTrue("refGene" in self.dba.tables, self.dba.tables)
 
     def test_nearest(self):
         from cruzdb.models import Feature
@@ -190,11 +190,11 @@ class TestDb(unittest.TestCase):
         f.txEnd = 61
         #db = Genome('hg18', host="localhost", user="brentp")
         db = self.dba
-        self.assert_(db.refGene.first() is not None)
-        self.assert_(db.refGene is not None)
+        self.assertTrue(db.refGene.first() is not None)
+        self.assertTrue(db.refGene is not None)
 
         res = db.knearest(db.refGene, f, k=2)
-        self.assert_(len(res) >= 2)
+        self.assertTrue(len(res) >= 2)
 
         f = db.refGene.first()
         key = (f.chrom, f.start, f.end, f.name)
@@ -202,7 +202,7 @@ class TestDb(unittest.TestCase):
         for k in (2, 4, 6):
             res = db.knearest("refGene", f, k=k)
             assert len(res) >= k
-            self.assert_(key in ((n.chrom, n.start, n.end, n.name) for n in res),
+            self.assertTrue(key in ((n.chrom, n.start, n.end, n.name) for n in res),
                     (res, f))
 
 
@@ -210,9 +210,9 @@ class TestDb(unittest.TestCase):
         assert f in db.upstream(db.refGene, f)
 
         down = db.downstream(db.refGene, f, k=10)
-        self.assert_(len(down) >= 10)
+        self.assertTrue(len(down) >= 10)
 
-        self.assert_(all(d.start >= f.start for d in down))
+        self.assertTrue(all(d.start >= f.start for d in down))
 
 
     def test_down_neg(self):
@@ -220,18 +220,18 @@ class TestDb(unittest.TestCase):
         fm = db.refGene.filter(db.refGene.c.strand == "-").first()
         down = db.downstream(db.refGene, fm, k=10)
 
-        self.assert_(all(d.start <= fm.start for d in down))
+        self.assertTrue(all(d.start <= fm.start for d in down))
 
     def test_dataframe(self):
         g = Genome('hg18')
 
         kg = g.dataframe('cpgIslandExt')
-        self.assert_(kg.shape[0] == g.cpgIslandExt.count())
+        self.assertTrue(kg.shape[0] == g.cpgIslandExt.count())
 
         q = g.cpgIslandExt.filter(g.cpgIslandExt.chromStart < 300000).limit(10)
 
         df = g.dataframe(q)
-        self.assert_(df.shape[0] == 10)
+        self.assertTrue(df.shape[0] == 10)
 
 
 

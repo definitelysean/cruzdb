@@ -1,5 +1,6 @@
 from . import sqlsoup
 from sqlalchemy import Table, util
+from importlib import import_module
 
 class Genome(sqlsoup.SQLSoup):
 
@@ -15,7 +16,7 @@ class Genome(sqlsoup.SQLSoup):
         if pids == []:
             pids = [x for x in tbl.columns if any(c in x.name.lower() for c in
                 'chrom start name'.split())]
-        models = __import__("cruzdb.models", globals(), locals(), [], -1).models
+        models = import_module("cruzdb.models")
         try:
             base = getattr(models, tablename)
         except AttributeError:
@@ -29,6 +30,6 @@ class Genome(sqlsoup.SQLSoup):
 if __name__ == "__main__":
     db = Genome('mysql://genome@genome-mysql.cse.ucsc.edu/hg19')
 
-    print(db.cpgIslandExt.first())
-    print(db.refGene.first())
+    print((db.cpgIslandExt.first()))
+    print((db.refGene.first()))
 

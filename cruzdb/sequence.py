@@ -3,6 +3,7 @@ import urllib as U
 __all__ = ('sequence', )
 
 def _seq_from_xml(xml):
+    xml = xml.decode()
     start = xml.find(">", xml.find("<DNA")) + 1
     end = xml.rfind("</DNA>")
     return xml[start:end].replace(' ', '').replace('\n', '').strip()
@@ -19,7 +20,7 @@ def sequence(db, chrom, start, end):
     """
     url = "http://genome.ucsc.edu/cgi-bin/das/%s" % db
     url += "/dna?segment=%s:%i,%i"
-    xml = U.urlopen(url % (chrom, start, end)).read()
+    xml = U.request.urlopen(url % (chrom, start, end)).read()
     return _seq_from_xml(xml)
 
 if __name__ == "__main__":

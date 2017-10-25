@@ -14,8 +14,8 @@ from operator import itemgetter
 
 # needed to avoid circular imports
 #CHANGED:from init import Base
-from sequence import sequence as _sequence
-from __init__ import Genome
+from .sequence import sequence as _sequence
+from .__init__ import Genome
 
 
 import re
@@ -26,7 +26,7 @@ def _ncbi_parse(html):
     try:
         info = html.split("Sequences producing significant alignments")[1].split("<tbody>")[1]
     except IndexError:
-        print >>sys.stderr, html
+        print(html)
         raise
     info = info.split("</table>")[0]
     regexp = re.compile(r'<tr>(.+?)(<\/tr>)', re.MULTILINE | re.DOTALL)
@@ -42,9 +42,9 @@ def _ncbi_parse(html):
                 pcols.append(cols[-1].split("href=")[1].split(">")[0])
             except IndexError: # no link
                 pcols.append("")
-            yield OrderedDict(zip(colnames, pcols))
+            yield OrderedDict(list(zip(colnames, pcols)))
         except:
-            print >>sys.stderr, record
+            print((record) >> sys.stderr)
 
 class CruzException(Exception):
     pass
@@ -158,15 +158,16 @@ class ABase(object):
         # drop the trailing comma
         if not self.is_gene_pred: return []
         if hasattr(self, "exonStarts"):
-            starts = (long(s) for s in self.exonStarts[:-1].split(","))
-            ends = (long(s) for s in self.exonEnds[:-1].split(","))
+            # TODO What the heck is happening here?
+            starts = (int(s) for s in self.exonStarts[:-1].decode().split(","))
+            ends = (int(s) for s in self.exonEnds[:-1].decode().split(","))
         else: # it is bed12
-            starts = [self.start + long(s) for s in self.chromStarts[:-1].split(",")]
-            ends = [starts[i] + long(size) for i, size \
-                    in enumerate(self.blockSizes[:-1].split(","))]
+            starts = [self.start + int(s) for s in self.chromStarts[:-1].decode().split(",")]
+            ends = [starts[i] + int(size) for i, size \
+                    in enumerate(self.blockSizes[:-1].decode().split(","))]
 
 
-        return zip(starts, ends)
+        return list(zip(starts, ends))
 
     @property
     def gene_features(self):
@@ -243,8 +244,8 @@ class ABase(object):
         cdsEnd
         """
         # drop the trailing comma
-        starts = (long(s) for s in self.exonStarts[:-1].split(","))
-        ends = (long(s) for s in self.exonEnds[:-1].split(","))
+        starts = (int(s) for s in self.exonStarts[:-1].decode().split(","))
+        ends = (int(s) for s in self.exonEnds[:-1].decode().split(","))
         return [(s, e) for s, e in zip(starts, ends)
                                           if e > self.cdsStart and
                                              s < self.cdsEnd]
@@ -308,7 +309,7 @@ class ABase(object):
         if not self.is_gene_pred: return []
         se = self.exons
         if not (se or exons) or exons == []: return []
-        starts, ends = zip(*exons) if exons is not None else zip(*se)
+        starts, ends = list(zip(*exons)) if exons is not None else list(zip(*se))
         return [(e, s) for e, s in zip(ends[:-1], starts[1:])]
 
     introns = property(_introns)
@@ -558,20 +559,20 @@ class ABase(object):
                     )
 
         if not ("RID =" in r.text and "RTOE" in r.text):
-            print >>sys.stderr, "no results"
+            print(("no results") >> sys.stderr)
             raise StopIteration
         rid = r.text.split("RID = ")[1].split("\n")[0]
 
         import time
         time.sleep(4)
-        print >>sys.stderr, "checking..."
+        print(("checking...") >> sys.stderr)
         r = requests.post('http://blast.ncbi.nlm.nih.gov/Blast.cgi',
                 data=dict(RID=rid, format="Text",
                     DESCRIPTIONS=100,
                     DATABASE=db,
                     CMD="Get", ))
         while "Status=WAITING" in r.text:
-            print >>sys.stderr, "checking..."
+            print(("checking...") >> sys.stderr)
             time.sleep(10)
             r = requests.post('http://blast.ncbi.nlm.nih.gov/Blast.cgi',
                 data=dict(RID=rid, format="Text",
@@ -642,13 +643,13 @@ class ABase(object):
             return pos
 
         subtract = 0
-        print >>sys.stderr, "exon lengths:", sum((ie - ib) for ib, ie in self.exons)
+        print(("exon lengths:", sum((ie - ib) for ib, ie in self.exons)) >> sys.stderr)
         for estart, eend in exons:
             if iend < pos:
                 subtract += (iend - istart)
             elif istart < pos and iend > pos:
                 subtract += (pos - istart)
-            print >>sys.stderr, subtract, (istart, iend), pos
+            print((subtract, (istart, iend), pos) >> sys.stderr)
         return pos - subtract
 
     def localize(self, *positions, **kwargs):
@@ -679,7 +680,7 @@ class ABase(object):
         for original_p in positions:
             subtract = 0
             p = original_p
-            print >>sys.stderr, p, l
+            print >> sys.stderr, (p, 1)
             if p < 0 or p >= l: # outside of transcript
                 local_ps.append(None)
                 continue

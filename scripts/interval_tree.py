@@ -117,7 +117,7 @@ if __name__ == '__main__':
     def rand():
         s = random.randint(1, 2000000)
         return Interval(s, s + random.randint(200, 6000))
-    intervals = [rand() for i in xrange(300000)]
+    intervals = [rand() for i in range(300000)]
     START, STOP = 390000, 400000
     intervals.append(Interval(0, 500000))
     tries = 100
@@ -129,7 +129,7 @@ if __name__ == '__main__':
         res = tree.find(START, STOP)
     treetime = time.time() - t
     t = time.time()
-    print treetime
+    print(treetime)
 
     #"""
 
@@ -137,15 +137,15 @@ if __name__ == '__main__':
         bf = [i for i in intervals if i.end >= START and i.start <= STOP]
     btime = time.time() - t
     assert not set(bf).symmetric_difference(res) , (len(bf), len(res), set(bf).difference(res), START, STOP)
-    print treetime, btime, btime/treetime
+    print((treetime, btime, btime/treetime))
 
 
     assert sum(1 for x in tree) == len(intervals), "iterator not working?"
 
-    intervals = [rand() for i in xrange(300)]
+    intervals = [rand() for i in range(300)]
     atree = IntervalTree(intervals)
-    import cPickle
-    btree = cPickle.loads(cPickle.dumps(atree, -1))
+    import pickle
+    btree = pickle.loads(pickle.dumps(atree, -1))
 
     af = atree.find(START, STOP)
     bf = btree.find(START, STOP)

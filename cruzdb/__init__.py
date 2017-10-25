@@ -1,7 +1,7 @@
 """
 cruzdb: library for pythonic access to UCSC genome-browser's MySQL database
 """
-from __future__ import print_function
+
 from . import soup
 import six
 import sys
@@ -57,7 +57,7 @@ class Genome(soup.Genome):
     db_regex = re.compile(r"^(sqlite|mysql|postgresql)(.+[^:]+){0,1}://")
 
     def __init__(self, db="", user="genome", host="genome-mysql.cse.ucsc.edu",
-            password="", dialect="mysqldb", engine=None):
+            password="", dialect="pymysql", engine=None):
 
         self.create_url(db, user, host, password, dialect)
         soup.Genome.__init__(self, self.dburl)
@@ -103,7 +103,7 @@ class Genome(soup.Genome):
         dest_url: str
             a dburl string, e.g. 'sqlite:///local.db'
         """
-        from mirror import mirror
+        from .mirror import mirror
         return mirror(self, tables, dest_url)
 
     def dataframe(self, table):
@@ -138,7 +138,7 @@ class Genome(soup.Genome):
 
     @property
     def tables(self):
-        return self._cache.keys()
+        return list(self._cache.keys())
 
     def load_file(self, fname, table=None, sep="\t", bins=False, indexes=None):
         """
@@ -169,7 +169,7 @@ class Genome(soup.Genome):
         if table is None:
             import os.path as op
             table = op.basename(op.splitext(fname)[0]).replace(".", "_")
-            print("writing to:", table, file=sys.stderr)
+            print(("writing to:", table))
 
         from pandas.io import sql
         import pandas as pa
@@ -190,12 +190,11 @@ class Genome(soup.Genome):
                 print(schema)
                 self.engine.execute(schema)
             elif i == 0:
-                print >>sys.stderr,\
-                        """adding to existing table, you may want to drop first"""
+                print("""adding to existing table, you may want to drop first""", file=sys.stderr)
 
             tbl = getattr(self, table)._table
             cols = chunk.columns
-            data = list(dict(zip(cols, x)) for x in chunk.values)
+            data = list(dict(list(zip(cols, x))) for x in chunk.values)
             if needs_name:
                 for d in data:
                     d['name'] = "%s:%s" % (d.get("chrom"), d.get("txStart", d.get("chromStart")))
@@ -205,7 +204,7 @@ class Genome(soup.Genome):
             self.engine.execute(tbl.insert(), data)
             self.session.commit()
             if i > 0:
-                print >>sys.stderr, "writing row:", i * 100000
+                print("writing row:", i * 100000, file=sys.stderr)
         if "txStart" in chunk.columns:
             if "chrom" in chunk.columns:
                 ssql = """CREATE INDEX "%s.chrom_txStart" ON "%s" (chrom, txStart)""" % (table, table)
@@ -391,7 +390,7 @@ class Genome(soup.Genome):
         else:
             chrom = chrom_or_feat
 
-        qstart, qend = long(start), long(end)
+        qstart, qend = int(start), int(end)
         res = self.bin_query(table, chrom, qstart, qend)
 
         i, change = 1, 350
@@ -421,7 +420,7 @@ class Genome(soup.Genome):
         if len(dists) == 0:
             return []
 
-        dists, res = zip(*dists)
+        dists, res = list(zip(*dists))
 
         if len(res) == k:
             return res
@@ -499,7 +498,7 @@ class Genome(soup.Genome):
 
         bins = [1]
         for offset in offsets:
-            bins.extend(range(offset + start, offset + end + 1))
+            bins.extend(list(range(offset + start, offset + end + 1)))
             start >>= binNextShift
             end >>= binNextShift
         return frozenset(bins)
@@ -537,25 +536,25 @@ if __name__ == "__main__":
 
 
     #1/0
-    print(g.cpgIslandExt[12].bed())
-    print(g.cpgIslandExt[12].bed('length', 'perCpg'))
+    print((g.cpgIslandExt[12].bed()))
+    print((g.cpgIslandExt[12].bed('length', 'perCpg')))
 
     #sys.exit()
 
     print("refGene")
     f = g.refGene[19]
-    print(f.bed12())
+    print((f.bed12()))
     f = g.refGene[19]
-    print(repr(f), f.cdsStart, f.cdsEnd)
-    print("exons", f.exons)
-    print("coding exons", f.coding_exons)
-    print("cds", f.cds)
+    print((repr(f), f.cdsStart, f.cdsEnd))
+    print(("exons", f.exons))
+    print(("coding exons", f.coding_exons))
+    print(("cds", f.cds))
 
-    print("introns", f.introns)
-    print("5'utr", f.utr5)
-    print("3'utr", f.utr3)
+    print(("introns", f.introns))
+    print(("5'utr", f.utr5))
+    print(("3'utr", f.utr3))
 
-    print(f.browser_link)
+    print((f.browser_link))
     #f.txEnd = f.txStart + 30
     #print list(f.blat())
     #print f.cds_sequence
@@ -565,7 +564,7 @@ if __name__ == "__main__":
     t = time.time()
     print(query)
     query.all()
-    print(time.time() - t)
+    print((time.time() - t))
 
     query = g.refGene.filter(and_(g.refGene.txStart > 10000, g.refGene.txEnd < 40000))
     query = query.filter(g.refGene.bin.in_(Genome.bins(10000, 40000)))
@@ -574,7 +573,7 @@ if __name__ == "__main__":
     query = g.bin_query(g.refGene, "chr1", 10000, 40000)
 
     query.all()
-    print(time.time() - t)
+    print((time.time() - t))
 
 
     g = Genome('hg19')
@@ -583,15 +582,15 @@ if __name__ == "__main__":
     q = q.filter(q.bin.in_(Genome.bins(1000, 2000)))
     print(q)
     q.first()
-    print(time.time() - t)
+    print((time.time() - t))
 
     Genome.save_bed(query)
 
     for transcript in g.refGene:
-        print(transcript, transcript.sequence()[:100] + "...")
+        print((transcript, transcript.sequence()[:100] + "..."))
         if transcript.txEnd > 8000: break
 
     kg = g.refGene._table
     q = kg.select(kg.c.txStart < 5000)
 
-    print(list(g.session.execute(q)))
+    print((list(g.session.execute(q))))
