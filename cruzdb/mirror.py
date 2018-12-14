@@ -85,7 +85,7 @@ def mirror(genome, tables, connection_string):
     for table_name in tables:
         # cause it ot be mapped
         table = getattr(genome, table_name)._table
-        print(('Mirroring', table_name) >> sys.stderr)
+        print(('Mirroring', table_name), file=sys.stderr)
 
         table = set_table(genome, table, table_name,
                 connection_string, dmeta)
@@ -108,7 +108,7 @@ def mirror(genome, tables, connection_string):
             records.append(data)
             if ii % 20000 == 0 and ii > 0:
                 destination.execute(ins, records)
-                print(("processing record %i" % ii) >> sys.stderr)
+                print(("processing record %i" % ii), file=sys.stderr)
                 destination.commit()
                 records = []
         destination.execute(ins, records)
@@ -121,7 +121,7 @@ def mirror(genome, tables, connection_string):
     new_counts = [getattr(newg, table_name).count() for table_name in tables]
     for tbl, oc, nc in zip(tables, orig_counts, new_counts):
         if oc != nc: print(("ERROR: mirrored table '%s' has %i \
-            rows while the original had %i" % (tbl, nc, oc))  >> sys.stderr)
+            rows while the original had %i" % (tbl, nc, oc)), file=sys.stderr)
     return newg
 
 if __name__ == "__main__":
